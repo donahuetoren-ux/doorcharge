@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quiz Autopilot</title>
+    <link rel="stylesheet" href="manager.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="top">
+        <img src="../../icons/icon48.png" alt="" width="30" height="30" />
+        <div class="brand">
+          <h1>Quiz Autopilot</h1>
+          <p>Answers questions from your own answer keys</p>
+        </div>
+        <label class="switch" title="Turn auto-answering on or off (Alt+Shift+A on the game page)">
+          <input type="checkbox" id="enabled" />
+          <span class="slider" aria-hidden="true"></span>
+          <span class="sr-only">Enabled</span>
+        </label>
+      </header>
+
+      <section class="card" aria-labelledby="settings-title">
+        <h2 id="settings-title" class="sr-only">Settings</h2>
+        <label class="row">
+          <span>Click the answer automatically<small>Off: only highlight it</small></span>
+          <input type="checkbox" id="autoClick" />
+        </label>
+        <label class="row">
+          <span>Delay before clicking</span>
+          <span class="num"><input type="number" id="delayMs" min="0" max="10000" step="100" /> ms</span>
+        </label>
+        <label class="row">
+          <span>Allow close matches<small>For slightly reworded questions</small></span>
+          <input type="checkbox" id="fuzzy" />
+        </label>
+        <label class="row">
+          <span>Show status panel on the game page</span>
+          <input type="checkbox" id="showPanel" />
+        </label>
+      </section>
+
+      <section class="card" aria-labelledby="keys-title">
+        <h2 id="keys-title">Answer keys <span id="totals" class="muted"></span></h2>
+        <ul id="sets" class="list"></ul>
+        <p id="noSets" class="empty">No answer keys yet. Import one below.</p>
+      </section>
+
+      <section class="card" aria-labelledby="import-title">
+        <h2 id="import-title">Import an answer key</h2>
+        <input type="text" id="setName" placeholder="Name, e.g. Unit 4 vocab" maxlength="80" />
+        <textarea
+          id="importText"
+          rows="7"
+          spellcheck="false"
+          placeholder="Paste spreadsheet cells, CSV or JSON here, or type one “Question | Answer” per line"
+        ></textarea>
+        <p id="preview" class="hint" aria-live="polite"></p>
+        <div class="actions">
+          <label class="button page-only">
+            <input type="file" id="importFile" accept=".csv,.tsv,.txt,.json,text/plain,text/csv,application/json" hidden />
+            Choose file…
+          </label>
+          <button type="button" class="button popup-only" id="openPage">Import a file…</button>
+          <button type="button" class="button primary" id="importBtn">Import</button>
+        </div>
+        <p id="importMsg" class="msg" role="status"></p>
+        <details>
+          <summary>Supported formats</summary>
+          <ul class="formats">
+            <li>
+              <b>Your Blooket or Kahoot spreadsheet.</b> If you built the game from Blooket’s or Kahoot’s import template,
+              copy the cells (including the header row) from Google Sheets or Excel and paste them, or save the sheet as CSV.
+              Any sheet with a header row works: a question column, answer columns and a “Correct answer” column holding
+              the answer number(s) like <code>2</code> or <code>1,3</code>, the letter, or the answer text.
+            </li>
+            <li><b>One question per line:</b><pre>What is the capital of France? | Paris
+How many legs does a spider have? | 8</pre></li>
+            <li><b>Q:/A: lines:</b><pre>Q: What is 7 × 8?
+A: 56</pre></li>
+            <li>
+              <b>JSON:</b> <code>[{"question": "…", "answer": "…"}]</code>, or questions with
+              <code>"answers": [...]</code> and <code>"correctAnswers": [...]</code>, or choices marked
+              <code>"correct": true</code>.
+            </li>
+          </ul>
+          <p class="muted">A question with several accepted answers can be listed on several lines.</p>
+        </details>
+      </section>
+
+      <section class="card" aria-labelledby="sites-title">
+        <h2 id="sites-title">Your own quiz pages</h2>
+        <p class="muted">
+          Blooket and Kahoot work automatically. To use Quiz Autopilot on a quiz page you made, open that page, click the
+          extension icon and choose “Enable on this site”.
+        </p>
+        <div id="siteAction" class="site-action popup-only"></div>
+        <ul id="sites" class="list"></ul>
+      </section>
+    </main>
+
+    <script src="../lib/text.js"></script>
+    <script src="../lib/parser.js"></script>
+    <script src="../lib/storage.js"></script>
+    <script src="manager.js"></script>
+  </body>
+</html>

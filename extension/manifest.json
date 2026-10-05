@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Quiz Autopilot",
+  "version": "1.0.0",
+  "description": "Picks the right answer in Blooket, Kahoot and your own quiz games, using answer keys you import.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Quiz Autopilot",
+    "default_popup": "src/ui/manager.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/ui/manager.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["*://*.blooket.com/*", "*://*.kahoot.it/*"],
+  "optional_host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.blooket.com/*", "*://*.kahoot.it/*"],
+      "js": ["src/lib/text.js", "src/lib/matcher.js", "src/lib/storage.js", "src/content/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

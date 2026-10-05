@@ -1,0 +1,74 @@
+<!doctype html>
+<!-- A hand-made practice quiz (no Blooket/Kahoot markup) used by the e2e test. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My Practice Game</title>
+    <style>
+      body { max-width: 640px; margin: 40px auto; font-family: Georgia, serif; }
+      .prompt { font-size: 28px; }
+      .choices { display: grid; gap: 8px; }
+      .choice { padding: 14px; font-size: 18px; text-align: left; cursor: pointer; }
+      aside { margin-top: 24px; color: #666; }
+    </style>
+  </head>
+  <body>
+    <h1>My Practice Game</h1>
+    <p>Score: <b id="score">0</b></p>
+    <section>
+      <p class="prompt" id="prompt"></p>
+      <div class="choices" id="choices"></div>
+    </section>
+    <!-- Answer text that is not a button must never be clicked. -->
+    <aside>Tip: <span>Cat</span> is gato in English. <span>7</span> is a lucky number.</aside>
+    <script>
+      const QUESTIONS = [
+        { q: 'What is H2O commonly called?', a: ['Salt', 'Water', 'Hydrogen', 'Oxygen'], c: 'Water' },
+        { q: 'How many continents are there?', a: ['5', '6', '7', '8'], c: '7' },
+        { q: 'Translate "gato" to English', a: ['Dog', 'Cat', 'Bird', 'Fish'], c: 'Cat' },
+      ];
+      window.__log = [];
+      window.__done = false;
+      window.__current = null;
+      let i = 0;
+      let score = 0;
+      const prompt = document.getElementById('prompt');
+      const box = document.getElementById('choices');
+      function shuffle(list) {
+        const a = list.slice();
+        for (let k = a.length - 1; k > 0; k--) {
+          const j = Math.floor(Math.random() * (k + 1));
+          [a[k], a[j]] = [a[j], a[k]];
+        }
+        return a;
+      }
+      function render() {
+        box.textContent = '';
+        if (i >= QUESTIONS.length) {
+          prompt.textContent = 'All done!';
+          window.__current = null;
+          window.__done = true;
+          return;
+        }
+        const Q = QUESTIONS[i];
+        window.__current = Q;
+        prompt.textContent = `${i + 1}. ${Q.q}`;
+        shuffle(Q.a).forEach((answer, k) => {
+          const button = document.createElement('button');
+          button.className = 'choice';
+          button.textContent = `${'ABCD'[k]}) ${answer}`;
+          button.addEventListener('click', () => {
+            window.__log.push({ question: Q.q, picked: answer, correct: Q.c });
+            if (answer === Q.c) document.getElementById('score').textContent = ++score;
+            prompt.textContent = answer === Q.c ? 'Correct!' : 'Wrong!';
+            box.textContent = '';
+            i++;
+            setTimeout(render, 400);
+          });
+          box.appendChild(button);
+        });
+      }
+      render();
+    </script>
+  </body>
+</html>

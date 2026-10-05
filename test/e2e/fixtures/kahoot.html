@@ -1,0 +1,81 @@
+<!doctype html>
+<!-- Mock of the Kahoot player screen (data-functional-selector attributes like the real site) used by the e2e test. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Kahoot!</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; background: #46178f; color: #fff; }
+      .bar { display: flex; justify-content: space-between; padding: 10px 16px; background: rgba(0, 0, 0, 0.25); }
+      .title { margin: 24px; padding: 20px; border-radius: 4px; background: #fff; color: #333; font-size: 26px; font-weight: 700; text-align: center; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px; }
+      .answer { display: flex; align-items: center; gap: 12px; min-height: 90px; padding: 0 16px; border: 0; border-radius: 4px; color: #fff; font-size: 20px; cursor: pointer; }
+      .answer[aria-pressed='true'] { outline: 4px solid #fff; }
+      .a0 { background: #e21b3c; } .a1 { background: #1368ce; } .a2 { background: #d89e00; } .a3 { background: #26890c; }
+      .shape { width: 32px; height: 32px; background: #fff; }
+      .s0 { clip-path: polygon(50% 0, 100% 100%, 0 100%); } .s1 { transform: rotate(45deg) scale(0.8); } .s2 { border-radius: 50%; }
+      .submit { margin: 0 16px; padding: 12px 24px; font-size: 18px; }
+      .wait { margin: 80px; font-size: 32px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div class="bar"><span data-functional-selector="question-index-counter" id="counter"></span><span>PIN 123456</span><span>tester</span></div>
+    <div id="stage"></div>
+    <script>
+      const QUESTIONS = [
+        { title: 'Which ocean is the largest?', choices: ['Atlantic', 'Pacific', 'Indian', 'Arctic'], correct: [1] },
+        { title: 'Select the prime numbers', choices: ['2', '4', '5', '9'], correct: [0, 2], multi: true },
+        // Host didn't enable "show questions on devices": only coloured shapes.
+        { title: null, choices: [null, null, null, null], correct: [3] },
+        { title: 'The Sun is a star.', choices: ['True', 'False'], correct: [0] },
+      ];
+      window.__log = [];
+      window.__done = false;
+      let i = 0;
+      const stage = document.getElementById('stage');
+      const counter = document.getElementById('counter');
+      function finish(picked) {
+        window.__log.push({ question: i + 1, picked: picked.slice().sort(), correct: QUESTIONS[i].correct.slice().sort() });
+        counter.textContent = '';
+        stage.innerHTML = '<div class="wait">Waiting for other players…</div>';
+        i++;
+        setTimeout(render, 500);
+      }
+      function render() {
+        if (i >= QUESTIONS.length) {
+          stage.innerHTML = '<div class="wait">Podium</div>';
+          window.__done = true;
+          return;
+        }
+        const Q = QUESTIONS[i];
+        counter.textContent = `${i + 1} of ${QUESTIONS.length}`;
+        const title = Q.title ? `<div class="title"><span data-functional-selector="block-title">${Q.title}</span></div>` : '';
+        const buttons = Q.choices
+          .map(
+            (c, k) =>
+              `<button class="answer a${k}" data-functional-selector="answer-${k}" aria-pressed="false" disabled><span class="shape s${k}"></span>` +
+              (c == null ? '' : `<span data-functional-selector="question-choice-text-${k}">${c}</span>`) +
+              '</button>'
+          )
+          .join('');
+        const submit = Q.multi ? '<button class="submit" data-functional-selector="multi-select-submit-button" disabled>Submit</button>' : '';
+        stage.innerHTML = `${title}<div class="grid">${buttons}</div>${submit}`;
+        const answerButtons = [...stage.querySelectorAll('.answer')];
+        const selected = new Set();
+        answerButtons.forEach((b, k) =>
+          b.addEventListener('click', () => {
+            if (!Q.multi) return finish([k]);
+            if (selected.has(k)) selected.delete(k);
+            else selected.add(k);
+            b.setAttribute('aria-pressed', String(selected.has(k)));
+            stage.querySelector('.submit').disabled = selected.size === 0;
+          })
+        );
+        if (Q.multi) stage.querySelector('.submit').addEventListener('click', () => finish([...selected]));
+        // Like the real game, answers unlock only after a short "get ready" moment.
+        setTimeout(() => answerButtons.forEach((b) => (b.disabled = false)), 600);
+      }
+      setTimeout(render, 300);
+    </script>
+  </body>
+</html>

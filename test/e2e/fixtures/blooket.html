@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- Mock of a Blooket game screen (same class-name style as the real site) used by the e2e test. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Blooket</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; background: #4c1d95; color: #fff; }
+      .styles__header___1kXe2 { padding: 10px 16px; font-size: 18px; }
+      .styles__questionContainer___3aZ1x { margin: 20px; padding: 24px; border-radius: 8px; background: #fff; color: #111; }
+      .styles__questionText___2MlSZ { font-size: 30px; font-weight: 700; text-align: center; }
+      .styles__answersHolder___3a7Aw { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px; }
+      .styles__answerContainer___3Xcha { padding: 36px 12px; border-radius: 8px; font-size: 22px; text-align: center; cursor: pointer; }
+      .styles__feedback___2b1Dm { padding: 80px; font-size: 40px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="styles__header___1kXe2">Gold Quest · 0 gold</div>
+      <div id="stage"></div>
+    </div>
+    <script>
+      const COLORS = ['#ffa31e', '#00cf77', '#0bc2cf', '#d93a3a'];
+      const QUESTIONS = [
+        { q: 'What is the capital of France?', answers: ['Berlin', 'Paris', 'Rome', 'Madrid'], correct: 'Paris' },
+        { q: 'What is 7 × 8?', answers: ['54', '56', '64', '48'], correct: '56' },
+        // Typo on purpose: the key says "known as" (close match).
+        { q: 'Which planet is know as the Red Planet?', answers: ['Venus', 'Mars', 'Jupiter', 'Mercury'], correct: 'Mars' },
+        { q: 'What is −5 + 10?', answers: ['-5', '5', '15', '-15'], correct: '5' },
+        { q: 'Who wrote "Romeo and Juliet"?', answers: ['Charles Dickens', 'William Shakespeare', 'Mark Twain', 'Jane Austen'], correct: 'William Shakespeare' },
+      ];
+      window.__log = [];
+      window.__done = false;
+      let i = 0;
+      const stage = document.getElementById('stage');
+      const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+      function shuffle(list) {
+        const a = list.slice();
+        for (let k = a.length - 1; k > 0; k--) {
+          const j = Math.floor(Math.random() * (k + 1));
+          [a[k], a[j]] = [a[j], a[k]];
+        }
+        return a;
+      }
+      function render() {
+        if (i >= QUESTIONS.length) {
+          stage.innerHTML = '<div class="styles__feedback___2b1Dm">Game over</div>';
+          window.__done = true;
+          return;
+        }
+        const Q = QUESTIONS[i];
+        stage.innerHTML =
+          `<div class="styles__questionContainer___3aZ1x"><div class="styles__questionText___2MlSZ">${esc(Q.q)}</div></div>` +
+          '<div class="styles__answersHolder___3a7Aw">' +
+          shuffle(Q.answers)
+            .map(
+              (a, k) =>
+                `<div class="styles__answerContainer___3Xcha" style="background:${COLORS[k]}"><div class="styles__answer___1Lp9a">` +
+                `<div class="styles__answerText___2T4lA"><div>${esc(a)}</div></div></div></div>`
+            )
+            .join('') +
+          '</div>';
+        for (const el of stage.querySelectorAll('[class*="answerContainer"]')) {
+          el.addEventListener('click', () => {
+            const picked = el.innerText.trim();
+            window.__log.push({ question: Q.q, picked, correct: Q.correct });
+            stage.innerHTML = `<div class="styles__feedback___2b1Dm">${picked === Q.correct ? 'Correct!' : 'Incorrect'}</div>`;
+            i++;
+            setTimeout(render, 400);
+          });
+        }
+      }
+      setTimeout(render, 300);
+    </script>
+  </body>
+</html>

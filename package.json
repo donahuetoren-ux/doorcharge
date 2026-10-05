@@ -1,0 +1,14 @@
+{
+  "name": "quiz-autopilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension that answers Blooket, Kahoot and your own quiz games from answer keys you import.",
+  "scripts": {
+    "test": "node --test test/unit/*.test.js",
+    "test:e2e": "node test/e2e/run.js",
+    "icons": "node tools/make-icons.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}
